@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    message TEXT NOT NULL CHECK (length(message) > 0),
-    status  TEXT NOT NULL CHECK (status = 'created' OR status = 'processing' OR status = 'completed')
+    message TEXT NOT NULL                   CHECK (length(message) > 0),
+    status  TEXT NOT NULL DEFAULT 'created' CHECK (status = 'created' OR status = 'processing' OR status = 'completed')
 );
 
 COMMIT;
