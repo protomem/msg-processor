@@ -53,7 +53,7 @@ func main() {
 		opts.ListenAddr = env.GetString("LISTEN_ADDR", ":8080")
 		opts.BaseURL = env.GetString("BASE_URL", "http://localhost:8080")
 
-		srv = NewAPIServer(log, nil, opts)
+		srv = NewAPIServer(log, store, opts)
 	}
 
 	shutdownErrCh := make(chan error)

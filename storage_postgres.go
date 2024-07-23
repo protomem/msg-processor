@@ -39,6 +39,7 @@ func NewPgStorage(ctx context.Context, log *slog.Logger, opts PgStorageOptions) 
 	return &PgStorage{
 		opts: opts,
 		log:  log.With("component", "pgStorage"),
+		db:   db,
 	}, nil
 }
 
