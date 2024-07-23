@@ -1,0 +1,69 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "80:80"
+    restart: on-failure
+    depends_on:
+      - pg
+      - kafka
+    networks:
+      - app_tier
+
+  pg:
+    image: postgres:14-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app_tier
+
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+      - "9094:9094"
+    restart: unless-stopped
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - app_tier
+
+  kafka_admin:
+    image: obsidiandynamics/kafdrop:4.0.1
+    restart: no
+    environment:
+      - KAFKA_BROKERCONNECT=kafka:9092
+      - JVM_OPTS=-Xms16M -Xmx64M -Xss360K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify
+    ports:
+      - "9000:9000"
+    depends_on:
+      - kafka
+    networks:
+      - app_tier
+
+volumes:
+  db_data:
+  kafka_data:
+
+networks:
+  app_tier:
+    driver: bridge
