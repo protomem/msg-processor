@@ -47,12 +47,52 @@ func (s *PgStorage) Close(ctx context.Context) error {
 	return s.db.Close()
 }
 
-func (s *PgStorage) CountProcessingMessages(ctx context.Context) (count uint64, err error) {
-	panic("unimplemented")
+func (s *PgStorage) CountProcessingMessages(ctx context.Context) (uint64, error) {
+	log := s.log.With("query", "countProcessingMessages")
+
+	query := `
+		SELECT COUNT(id)
+		FROM messages
+		WHERE status = $1
+	`
+
+	log.Debug("build query", "sql", query, "args", []any{MessageProcessing})
+
+	var count uint64
+	row := s.db.QueryRowContext(ctx, query, MessageProcessing)
+	if err := row.Scan(&count); err != nil {
+		log.Debug("failed to execute query", "error", err)
+
+		return 0, err
+	}
+
+	log.Debug("executed query", "count", count)
+
+	return count, nil
 }
 
-func (s *PgStorage) CountCompletedMessages(ctx context.Context) (count uint64, err error) {
-	panic("unimplemented")
+func (s *PgStorage) CountCompletedMessages(ctx context.Context) (uint64, error) {
+	log := s.log.With("query", "countCompletedMessages")
+
+	query := `
+		SELECT COUNT(id)
+		FROM messages
+		WHERE status = $1
+	`
+
+	log.Debug("build query", "sql", query, "args", []any{MessageCompleted})
+
+	var count uint64
+	row := s.db.QueryRowContext(ctx, query, MessageCompleted)
+	if err := row.Scan(&count); err != nil {
+		log.Debug("failed to execute query", "error", err)
+
+		return 0, err
+	}
+
+	log.Debug("executed query", "count", count)
+
+	return count, nil
 }
 
 func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) {
