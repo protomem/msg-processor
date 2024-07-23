@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"log/slog"
+	"strings"
+
+	"github.com/segmentio/kafka-go"
 )
 
 var _ Queue = (*KafkaQueue)(nil)
@@ -13,17 +18,65 @@ type KafkaQueueOptions struct {
 }
 
 type KafkaQueue struct {
-	log *slog.Logger
+	opts KafkaQueueOptions
+	log  *slog.Logger
+
+	writer *kafka.Writer
 }
 
 func NewKafkaQueue(ctx context.Context, log *slog.Logger, opts KafkaQueueOptions) (*KafkaQueue, error) {
-	return &KafkaQueue{}, nil
+	addrs := strings.Split(opts.Addrs, ",")
+
+	writer := &kafka.Writer{
+		Addr:                   kafka.TCP(addrs...),
+		Topic:                  opts.Topic,
+		Balancer:               &kafka.Hash{},
+		AllowAutoTopicCreation: true,
+	}
+
+	return &KafkaQueue{
+		opts: opts,
+		log:  log.With("component", "kafkaQueue"),
+
+		writer: writer,
+	}, nil
 }
 
 func (q *KafkaQueue) WriteEvents(ctx context.Context, events ...Event) error {
-	panic("unimplemented")
+	msgs := kafakMsgsFromEvents(events...)
+
+	if err := q.writer.WriteMessages(ctx, msgs...); err != nil {
+		q.log.Debug("failed to write events", "error", err)
+
+		return err
+	}
+
+	q.log.Debug("written events", "countEvents", len(msgs))
+
+	return nil
 }
 
 func (q *KafkaQueue) Close(_ context.Context) error {
-	panic("unimplemented")
+	var errs error
+
+	if err := q.writer.Close(); err != nil {
+		errs = errors.Join(errs, err)
+	}
+
+	return errs
+}
+
+func kafkaMsgFromEvent(evt Event) kafka.Message {
+	return kafka.Message{
+		Key:   bytes.Clone(evt.Key),
+		Value: bytes.Clone(evt.Value),
+	}
+}
+
+func kafakMsgsFromEvents(evts ...Event) []kafka.Message {
+	msgs := make([]kafka.Message, len(evts))
+	for i := 0; i < len(evts); i++ {
+		msgs[i] = kafkaMsgFromEvent(evts[i])
+	}
+	return msgs
 }
