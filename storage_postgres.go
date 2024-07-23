@@ -71,7 +71,7 @@ func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) 
 		return Message{}, err
 	}
 
-	log.Debug("executed query", "result", msg)
+	log.Debug("executed query", "msgId", msg.ID)
 
 	return msg, nil
 }
