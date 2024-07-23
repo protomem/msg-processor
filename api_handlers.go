@@ -42,7 +42,15 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 	}
 	msg.Status = MessageProcessing
 
-	// TODO: Send message to queue(kafka)
+	msgJSON, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	evt := NewEvent([]byte("newMessage"), msgJSON)
+	if err := s.queue.WriteEvents(ctx, evt); err != nil {
+		return err
+	}
 
 	if err := s.store.UpdateStatusMessages(ctx, []uint64{msgId}, MessageProcessing); err != nil {
 		return err

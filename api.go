@@ -18,14 +18,17 @@ type APIServer struct {
 	srv  *http.Server
 
 	store Storage
+	queue Queue
 }
 
-func NewAPIServer(log *slog.Logger, store Storage, opts APIServerOptions) *APIServer {
+func NewAPIServer(log *slog.Logger, store Storage, queue Queue, opts APIServerOptions) *APIServer {
 	return &APIServer{
-		opts:  opts,
-		log:   log.With("component", "apiServer"),
-		srv:   &http.Server{Addr: opts.ListenAddr},
+		opts: opts,
+		log:  log.With("component", "apiServer"),
+		srv:  &http.Server{Addr: opts.ListenAddr},
+
 		store: store,
+		queue: queue,
 	}
 }
 

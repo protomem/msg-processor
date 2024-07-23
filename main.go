@@ -47,13 +47,32 @@ func main() {
 		}
 	}()
 
+	var queue Queue
+	{
+		var opts KafkaQueueOptions
+		opts.Addrs = env.GetString("QUEUE_ADDRS", "localhost:9092")
+		opts.Topic = env.GetString("QUEUE_TOPIC", "messages")
+
+		var err error
+		queue, err = NewKafkaQueue(ctx, log, opts)
+		if err != nil {
+			log.Error("failed to create queue")
+			panic(err)
+		}
+	}
+	defer func() {
+		if err := queue.Close(ctx); err != nil {
+			log.Error("failed to close queue")
+		}
+	}()
+
 	var srv *APIServer
 	{
 		var opts APIServerOptions
 		opts.ListenAddr = env.GetString("LISTEN_ADDR", ":8080")
 		opts.BaseURL = env.GetString("BASE_URL", "http://localhost:8080")
 
-		srv = NewAPIServer(log, store, opts)
+		srv = NewAPIServer(log, store, queue, opts)
 	}
 
 	shutdownErrCh := make(chan error)
