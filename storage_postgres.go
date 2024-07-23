@@ -51,7 +51,7 @@ func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) 
 	log := s.log.With("query", "getMessage")
 
 	query := `
-		SELECT (id, created_at, updated_at, message, status)
+		SELECT id, created_at, updated_at, message, status
 		FROM messages
 		WHERE id = $1
 		LIMIT 1
