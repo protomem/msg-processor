@@ -57,7 +57,7 @@ func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) 
 		LIMIT 1
 	`
 
-	log.Debug("build query", "query", query, "args", []any{id})
+	log.Debug("build query", "sql", query, "args", []any{id})
 
 	var msg Message
 	row := s.db.QueryRowContext(ctx, query, id)
@@ -85,7 +85,7 @@ func (s *PgStorage) SaveMessage(ctx context.Context, dto SaveMessageDTO) (uint64
 		RETURNING id
 	`
 
-	log.Debug("build query", "query", query, "args", []any{dto.Text})
+	log.Debug("build query", "sql", query, "args", []any{dto.Text})
 
 	var id uint64
 	row := s.db.QueryRowContext(ctx, query, dto.Text)
@@ -109,7 +109,7 @@ func (s *PgStorage) UpdateStatusMessages(ctx context.Context, ids []uint64, stat
 		WHERE id = ANY($2::bigint[])
 	`
 
-	log.Debug("build query", "query", query, "args", []any{status, ids})
+	log.Debug("build query", "sql", query, "args", []any{status, ids})
 
 	res, err := s.db.ExecContext(ctx, query, status, ids)
 	if err != nil {
