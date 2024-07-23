@@ -44,21 +44,9 @@ func (s *APIServer) Shutdown(ctx context.Context) error {
 	return s.srv.Shutdown(ctx)
 }
 
-func (s *APIServer) setupRoutes() http.Handler {
-	router := http.NewServeMux()
-
-	router.HandleFunc("GET /health", makeHTTPHandleFunc(s.handleHealth))
-
-	return router
-}
-
-func (s *APIServer) handleHealth(w http.ResponseWriter, _ *http.Request) error {
-	return WriteJSON(w, http.StatusOK, JSONObject{"status": "OK"})
-}
-
 type APIHandlerFunc func(w http.ResponseWriter, r *http.Request) error
 
-func makeHTTPHandleFunc(f APIHandlerFunc) http.HandlerFunc {
+func MakeHTTPHandleFunc(f APIHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := f(w, r); err != nil {
 			_ = WriteJSON(w, http.StatusInternalServerError, APIError{Error: err.Error()})
