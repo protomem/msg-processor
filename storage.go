@@ -5,7 +5,7 @@ import (
 )
 
 type SaveMessageDTO struct {
-	Text string
+	Text string `json:"message"`
 }
 
 type Storage interface {
