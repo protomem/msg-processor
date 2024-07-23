@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type MessageStatus string
 
@@ -9,6 +12,8 @@ const (
 	MessageProcessing MessageStatus = "processing"
 	MessageCompleted  MessageStatus = "completed"
 )
+
+var ErrMsgNotFound = errors.New("message not found")
 
 type Message struct {
 	ID uint64 `json:"id"`
