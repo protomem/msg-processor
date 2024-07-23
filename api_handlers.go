@@ -11,6 +11,7 @@ func (s *APIServer) setupRoutes() http.Handler {
 	router.HandleFunc("GET /health", MakeHTTPHandleFunc(s.handleHealth))
 
 	router.HandleFunc("POST /api/messages", MakeHTTPHandleFunc(s.handleSaveMessage))
+	router.HandleFunc("GET /api/messages", MakeHTTPHandleFunc(s.handleMessageStatistics))
 
 	return router
 }
@@ -50,4 +51,28 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 	log.Debug("saved message", "msgId", msg.ID)
 
 	return WriteJSON(w, http.StatusOK, msg)
+}
+
+func (s *APIServer) handleMessageStatistics(w http.ResponseWriter, r *http.Request) error {
+	ctx := r.Context()
+	log := s.log.With("handler", "messageStatistics")
+
+	var (
+		err   error
+		stats MessageStatisticsDTO
+	)
+
+	stats.Processing, err = s.store.CountProcessingMessages(ctx)
+	if err != nil {
+		return err
+	}
+
+	stats.Completed, err = s.store.CountCompletedMessages(ctx)
+	if err != nil {
+		return err
+	}
+
+	log.Debug("get message statistics")
+
+	return WriteJSON(w, http.StatusOK, stats)
 }
