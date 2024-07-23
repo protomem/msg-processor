@@ -38,6 +38,7 @@ func (s *APIServer) ListenAddr() string {
 
 func (s *APIServer) Run() error {
 	h := s.setupRoutes()
+	h = UseMiddleware(h, s.logAccess, s.recovery)
 	s.srv.Handler = h
 
 	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
