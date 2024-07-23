@@ -63,7 +63,7 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 
 	log.Debug("saved message", "msgId", msg.ID)
 
-	return WriteJSON(w, http.StatusOK, msg)
+	return WriteJSON(w, http.StatusCreated, msg)
 }
 
 func (s *APIServer) handleMessageStatistics(w http.ResponseWriter, r *http.Request) error {
