@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+
+	"github.com/protomem/msg-processor/pkg/ctxstore"
 )
 
 type APIServerOptions struct {
@@ -53,10 +55,17 @@ func (s *APIServer) Shutdown(ctx context.Context) error {
 
 type APIHandlerFunc func(w http.ResponseWriter, r *http.Request) error
 
-func MakeHTTPHandleFunc(f APIHandlerFunc) http.HandlerFunc {
+func MakeHTTPHandleFunc(log *slog.Logger, handler string, fn APIHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := f(w, r); err != nil {
-			_ = WriteJSON(w, http.StatusInternalServerError, APIError{Error: err.Error()})
+		ctx := ctxstore.With(r.Context(), HandlerKey, handler)
+		if err := fn(w, r.WithContext(ctx)); err != nil {
+			log.Warn(
+				"failed to process request",
+				"error", err,
+				TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+				HandlerKey.String(), ctxstore.MustFrom[string](ctx, HandlerKey),
+			)
+			_ = WriteJSON(w, http.StatusInternalServerError, APIError{Error: http.StatusText(http.StatusInternalServerError)})
 		}
 	}
 }

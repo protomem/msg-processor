@@ -10,10 +10,10 @@ import (
 func (s *APIServer) setupRoutes() http.Handler {
 	router := http.NewServeMux()
 
-	router.HandleFunc("GET /health", MakeHTTPHandleFunc(s.handleHealth))
+	router.HandleFunc("GET /health", MakeHTTPHandleFunc(s.log, "health", s.handleHealth))
 
-	router.HandleFunc("POST /api/msg", MakeHTTPHandleFunc(s.handleSaveMessage))
-	router.HandleFunc("GET /api/msg", MakeHTTPHandleFunc(s.handleMessageStatistics))
+	router.HandleFunc("POST /api/msg", MakeHTTPHandleFunc(s.log, "saveMessage", s.handleSaveMessage))
+	router.HandleFunc("GET /api/msg", MakeHTTPHandleFunc(s.log, "messageStatistics", s.handleMessageStatistics))
 
 	return router
 }
@@ -25,7 +25,7 @@ func (s *APIServer) handleHealth(w http.ResponseWriter, _ *http.Request) error {
 func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 	log := s.log.With(
-		"handler", "saveMessage",
+		HandlerKey.String(), ctxstore.MustFrom[string](ctx, HandlerKey),
 		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
 	)
 
@@ -69,7 +69,7 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 func (s *APIServer) handleMessageStatistics(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
 	log := s.log.With(
-		"handler", "messageStatistics",
+		HandlerKey.String(), ctxstore.MustFrom[string](ctx, HandlerKey),
 		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
 	)
 
