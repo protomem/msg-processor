@@ -47,7 +47,7 @@ func (s *APIServer) Shutdown(ctx context.Context) error {
 func (s *APIServer) setupRoutes() http.Handler {
 	router := http.NewServeMux()
 
-	router.HandleFunc("/health", makeHTTPHandleFunc(s.handleHealth))
+	router.HandleFunc("GET /health", makeHTTPHandleFunc(s.handleHealth))
 
 	return router
 }
