@@ -47,6 +47,14 @@ func (s *PgStorage) Close(ctx context.Context) error {
 	return s.db.Close()
 }
 
+func (s *PgStorage) CountProcessingMessages(ctx context.Context) (count uint64, err error) {
+	panic("unimplemented")
+}
+
+func (s *PgStorage) CountCompletedMessages(ctx context.Context) (count uint64, err error) {
+	panic("unimplemented")
+}
+
 func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) {
 	log := s.log.With("query", "getMessage")
 
