@@ -18,6 +18,7 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
 	log := NewLogger()
 
 	if *_cfgFile != "" {
@@ -27,13 +28,32 @@ func main() {
 		}
 	}
 
+	var store Storage
+	{
+		var opts PgStorageOptions
+		opts.DSN = env.GetString("STORE_DSN", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
+		opts.Ping = env.GetBool("STORE_PING", false)
+
+		var err error
+		store, err = NewPgStorage(ctx, log, opts)
+		if err != nil {
+			log.Error("failed to create storage", "error", err)
+			panic(err)
+		}
+	}
+	defer func() {
+		if err := store.Close(ctx); err != nil {
+			log.Error("failed to close storage", "error", err)
+		}
+	}()
+
 	var srv *APIServer
 	{
 		var opts APIServerOptions
 		opts.ListenAddr = env.GetString("LISTEN_ADDR", ":8080")
 		opts.BaseURL = env.GetString("BASE_URL", "http://localhost:8080")
 
-		srv = NewAPIServer(log, opts)
+		srv = NewAPIServer(log, nil, opts)
 	}
 
 	shutdownErrCh := make(chan error)
