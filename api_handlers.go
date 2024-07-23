@@ -39,6 +39,7 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 	if err != nil {
 		return err
 	}
+	msg.Status = MessageProcessing
 
 	// TODO: Send message to queue(kafka)
 
