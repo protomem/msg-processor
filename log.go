@@ -3,10 +3,12 @@ package main
 import (
 	"log/slog"
 	"os"
+
+	"github.com/lmittmann/tint"
 )
 
 func NewLogger() *slog.Logger {
-	o := slog.HandlerOptions{Level: slog.LevelDebug}
-	h := slog.NewJSONHandler(os.Stdout, &o)
+	o := tint.Options{Level: slog.LevelDebug}
+	h := tint.NewHandler(os.Stdout, &o)
 	return slog.New(h)
 }
