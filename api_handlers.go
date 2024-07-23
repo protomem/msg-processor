@@ -10,8 +10,8 @@ func (s *APIServer) setupRoutes() http.Handler {
 
 	router.HandleFunc("GET /health", MakeHTTPHandleFunc(s.handleHealth))
 
-	router.HandleFunc("POST /api/messages", MakeHTTPHandleFunc(s.handleSaveMessage))
-	router.HandleFunc("GET /api/messages", MakeHTTPHandleFunc(s.handleMessageStatistics))
+	router.HandleFunc("POST /api/msg", MakeHTTPHandleFunc(s.handleSaveMessage))
+	router.HandleFunc("GET /api/msg", MakeHTTPHandleFunc(s.handleMessageStatistics))
 
 	return router
 }
