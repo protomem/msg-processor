@@ -10,7 +10,7 @@ build:
 
 .PHONY: run
 run: build
-	./tmp/${PROJECT}
+	./bin/${PROJECT}
 
 
 .PHONY: test
