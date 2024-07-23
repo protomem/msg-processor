@@ -9,8 +9,9 @@ build:
 
 
 .PHONY: run
+run: cfg_file=.env.dev
 run: build
-	./bin/${PROJECT}
+	./bin/${PROJECT} -cfg=${cfg_file}
 
 
 .PHONY: test

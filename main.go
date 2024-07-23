@@ -2,20 +2,36 @@ package main
 
 import (
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/protomem/msg-processor/pkg/env"
 )
+
+var _cfgFile = flag.String("cfg", "", "path to config file")
+
+func init() {
+	flag.Parse()
+}
 
 func main() {
 	log := NewLogger()
 
+	if *_cfgFile != "" {
+		if err := env.Load(*_cfgFile); err != nil {
+			log.Error("failed to load config", "error", err)
+			panic(err)
+		}
+	}
+
 	var srv *APIServer
 	{
 		var opts APIServerOptions
-		opts.ListenAddr = ":8080"
-		opts.BaseURL = "http://localhost:8080"
+		opts.ListenAddr = env.GetString("LISTEN_ADDR", ":8080")
+		opts.BaseURL = env.GetString("BASE_URL", "http://localhost:8080")
 
 		srv = NewAPIServer(log, opts)
 	}
