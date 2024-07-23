@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"strings"
 
+	"github.com/protomem/msg-processor/pkg/ctxstore"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -43,15 +44,16 @@ func NewKafkaQueue(ctx context.Context, log *slog.Logger, opts KafkaQueueOptions
 }
 
 func (q *KafkaQueue) WriteEvents(ctx context.Context, events ...Event) error {
+	log := q.log.With(TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey))
 	msgs := kafakMsgsFromEvents(events...)
 
 	if err := q.writer.WriteMessages(ctx, msgs...); err != nil {
-		q.log.Debug("failed to write events", "error", err)
+		log.Debug("failed to write events", "error", err)
 
 		return err
 	}
 
-	q.log.Debug("written events", "countEvents", len(msgs))
+	log.Debug("written events", "countEvents", len(msgs))
 
 	return nil
 }

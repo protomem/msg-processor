@@ -4,6 +4,9 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/protomem/msg-processor/pkg/ctxstore"
 )
 
 func UseMiddleware(next http.Handler, middlewares ...func(http.Handler) http.Handler) http.Handler {
@@ -12,6 +15,14 @@ func UseMiddleware(next http.Handler, middlewares ...func(http.Handler) http.Han
 	}
 
 	return next
+}
+
+func (s *APIServer) traceId(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tid := genTraceId()
+		ctx := ctxstore.With(r.Context(), TraceIDKey, tid)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func (s *APIServer) logAccess(next http.Handler) http.Handler {
@@ -27,11 +38,12 @@ func (s *APIServer) logAccess(next http.Handler) http.Handler {
 			method = r.Method
 			url    = r.URL.String()
 			proto  = r.Proto
+			tid    = ctxstore.MustFrom[string](r.Context(), TraceIDKey)
 		)
 
 		userAttr := slog.Group("user", "ip", ip)
-		requestAttrs := slog.Group("request", "method", method, "url", url, "proto", proto)
-		responseAttrs := slog.Group("repsonse", "status", rw.StatusCode, "size", rw.BytesCount, "duration", end.Sub(begin))
+		requestAttrs := slog.Group("request", "method", method, "url", url, "proto", proto, TraceIDKey.String(), tid)
+		responseAttrs := slog.Group("response", "status", rw.StatusCode, "size", rw.BytesCount, "duration", end.Sub(begin))
 
 		s.log.Info("access log", userAttr, requestAttrs, responseAttrs)
 	})
@@ -41,12 +53,18 @@ func (s *APIServer) recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				s.log.Error("panic occurred", "error", err)
+				tid := ctxstore.MustFrom[string](r.Context(), TraceIDKey)
+				s.log.Error("panic occurred", "error", err, TraceIDKey.String(), tid)
 				_ = WriteJSON(w, http.StatusInternalServerError, APIError{Error: http.StatusText(http.StatusInternalServerError)})
 			}
 		}()
 		next.ServeHTTP(w, r)
 	})
+}
+
+func genTraceId() string {
+	id, _ := uuid.NewRandom()
+	return id.String()
 }
 
 type responseWrapper struct {

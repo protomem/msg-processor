@@ -7,6 +7,7 @@ import (
 	"log/slog"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/protomem/msg-processor/pkg/ctxstore"
 )
 
 const _pgDriverName = "pgx"
@@ -48,7 +49,10 @@ func (s *PgStorage) Close(ctx context.Context) error {
 }
 
 func (s *PgStorage) CountProcessingMessages(ctx context.Context) (uint64, error) {
-	log := s.log.With("query", "countProcessingMessages")
+	log := s.log.With(
+		"query", "countProcessingMessages",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	query := `
 		SELECT COUNT(id)
@@ -72,7 +76,10 @@ func (s *PgStorage) CountProcessingMessages(ctx context.Context) (uint64, error)
 }
 
 func (s *PgStorage) CountCompletedMessages(ctx context.Context) (uint64, error) {
-	log := s.log.With("query", "countCompletedMessages")
+	log := s.log.With(
+		"query", "countCompletedMessages",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	query := `
 		SELECT COUNT(id)
@@ -96,7 +103,10 @@ func (s *PgStorage) CountCompletedMessages(ctx context.Context) (uint64, error) 
 }
 
 func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) {
-	log := s.log.With("query", "getMessage")
+	log := s.log.With(
+		"query", "getMessage",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	query := `
 		SELECT id, created_at, updated_at, message, status
@@ -125,7 +135,10 @@ func (s *PgStorage) GetMessage(ctx context.Context, id uint64) (Message, error) 
 }
 
 func (s *PgStorage) SaveMessage(ctx context.Context, dto SaveMessageDTO) (uint64, error) {
-	log := s.log.With("query", "saveMessage")
+	log := s.log.With(
+		"query", "saveMessage",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	query := `
 		INSERT INTO messages (message)
@@ -149,7 +162,10 @@ func (s *PgStorage) SaveMessage(ctx context.Context, dto SaveMessageDTO) (uint64
 }
 
 func (s *PgStorage) UpdateStatusMessages(ctx context.Context, ids []uint64, status MessageStatus) error {
-	log := s.log.With("query", "updateStatusMessages")
+	log := s.log.With(
+		"query", "updateStatusMessages",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	query := `
 		UPDATE messages

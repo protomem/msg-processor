@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/protomem/msg-processor/pkg/ctxstore"
 )
 
 func (s *APIServer) setupRoutes() http.Handler {
@@ -22,7 +24,10 @@ func (s *APIServer) handleHealth(w http.ResponseWriter, _ *http.Request) error {
 
 func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
-	log := s.log.With("handler", "saveMessage")
+	log := s.log.With(
+		"handler", "saveMessage",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	var dto SaveMessageDTO
 	if err := json.NewDecoder(r.Body).Decode(&dto); err != nil {
@@ -63,7 +68,10 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 
 func (s *APIServer) handleMessageStatistics(w http.ResponseWriter, r *http.Request) error {
 	ctx := r.Context()
-	log := s.log.With("handler", "messageStatistics")
+	log := s.log.With(
+		"handler", "messageStatistics",
+		TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey),
+	)
 
 	var (
 		err   error
