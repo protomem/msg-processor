@@ -39,6 +39,7 @@ func NewKafkaQueue(ctx context.Context, log *slog.Logger, opts KafkaQueueOptions
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   addrs,
 		Topic:     opts.Topic,
+		GroupID:   "msg-processor",
 		Partition: 0,
 		MaxBytes:  10e6, // 10MB
 	})
