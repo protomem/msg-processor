@@ -49,7 +49,7 @@ docker compose up -d
 make run-docker
 ```
 
-## Мигации
+## Миграции
 
 ```sh
 DB_DSN="<db_dsn>" make migrations/up # запустить миграции
