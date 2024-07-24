@@ -22,7 +22,7 @@ services:
       - "5432:5432"
     restart: unless-stopped
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
     networks:
       - app_tier
 
@@ -61,7 +61,7 @@ services:
       - app_tier
 
 volumes:
-  db_data:
+  pg_data:
   kafka_data:
 
 networks:
