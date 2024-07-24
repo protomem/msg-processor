@@ -21,6 +21,7 @@ func NewEvent(key []byte, value []byte) Event {
 
 type Queue interface {
 	WriteEvents(ctx context.Context, events ...Event) error
+	ReadEvent(ctx context.Context) (Event, error)
 
 	Close(ctx context.Context) error
 }

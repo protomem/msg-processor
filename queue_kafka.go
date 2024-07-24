@@ -23,6 +23,7 @@ type KafkaQueue struct {
 	log  *slog.Logger
 
 	writer *kafka.Writer
+	reader *kafka.Reader
 }
 
 func NewKafkaQueue(ctx context.Context, log *slog.Logger, opts KafkaQueueOptions) (*KafkaQueue, error) {
@@ -35,11 +36,19 @@ func NewKafkaQueue(ctx context.Context, log *slog.Logger, opts KafkaQueueOptions
 		AllowAutoTopicCreation: true,
 	}
 
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:   addrs,
+		Topic:     opts.Topic,
+		Partition: 0,
+		MaxBytes:  10e6, // 10MB
+	})
+
 	return &KafkaQueue{
 		opts: opts,
 		log:  log.With("component", "kafkaQueue"),
 
 		writer: writer,
+		reader: reader,
 	}, nil
 }
 
@@ -58,10 +67,18 @@ func (q *KafkaQueue) WriteEvents(ctx context.Context, events ...Event) error {
 	return nil
 }
 
+func (q *KafkaQueue) ReadEvent(ctx context.Context) (Event, error) {
+	panic("not implemented")
+}
+
 func (q *KafkaQueue) Close(_ context.Context) error {
 	var errs error
 
 	if err := q.writer.Close(); err != nil {
+		errs = errors.Join(errs, err)
+	}
+
+	if err := q.reader.Close(); err != nil {
 		errs = errors.Join(errs, err)
 	}
 
