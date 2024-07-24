@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"os"
 	"os/signal"
@@ -75,6 +76,25 @@ func main() {
 		srv = NewAPIServer(log, store, queue, opts)
 	}
 
+	scheduler := NewScheduler()
+	scheduler.Start(ctx)
+	{
+		var errs error
+
+		if err := RunTaskReadProcessingMessages(
+			scheduler, log,
+			store, queue,
+			env.GetDuration("READ_PROC_MSGS_TIMEOUT", 1*time.Second),
+		); err != nil {
+			errs = errors.Join(errs, err)
+		}
+
+		if errs != nil {
+			log.Error("failed to run tasks", "error", errs)
+			panic(errs)
+		}
+	}
+
 	shutdownErrCh := make(chan error)
 	go func() {
 		<-quit()
@@ -82,7 +102,12 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 
-		shutdownErrCh <- srv.Shutdown(ctx)
+		err := srv.Shutdown(ctx)
+
+		scheduler.Stop()
+		scheduler.Wait(ctx)
+
+		shutdownErrCh <- err
 	}()
 
 	log.Info("starting server", "addr", srv.ListenAddr())

@@ -7,6 +7,7 @@ require (
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lmittmann/tint v1.0.5
+	github.com/reugn/go-quartz v0.12.0
 	github.com/segmentio/kafka-go v0.4.47
 )
 
