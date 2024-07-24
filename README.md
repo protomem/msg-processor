@@ -29,7 +29,7 @@
 - `QUEUE_ADDRS` - адреса кафки
 - `QUEUE_TOPIC` - топик кафки
 - `LISTEN_ADDR` - адрес для прослушивания сервера
-- `BASE_URL` - адрес для Swagger
+- `BASE_URL` - адрес для доступа к API
 - `READ_PROC_MSGS_INTERVAL` - интервал опроса кафки
 - `READ_PROC_MSGS_TIMEOUT` - время ожидания сообщения от кафки
 
