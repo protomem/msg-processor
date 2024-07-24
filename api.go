@@ -42,7 +42,7 @@ func (s *APIServer) Run() error {
 	s.setupSwagger()
 
 	h := s.setupRoutes()
-	h = UseMiddleware(h, s.traceId, s.logAccess, s.recovery)
+	h = UseMiddleware(h, s.traceID, s.logAccess, s.recovery)
 	s.srv.Handler = h
 
 	if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {

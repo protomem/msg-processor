@@ -17,9 +17,9 @@ func UseMiddleware(next http.Handler, middlewares ...func(http.Handler) http.Han
 	return next
 }
 
-func (s *APIServer) traceId(next http.Handler) http.Handler {
+func (s *APIServer) traceID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tid := genTraceId()
+		tid := genTraceID()
 		ctx := ctxstore.With(r.Context(), TraceIDKey, tid)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -62,7 +62,7 @@ func (s *APIServer) recovery(next http.Handler) http.Handler {
 	})
 }
 
-func genTraceId() string {
+func genTraceID() string {
 	id, _ := uuid.NewRandom()
 	return id.String()
 }

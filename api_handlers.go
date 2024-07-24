@@ -64,12 +64,12 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 
 	log.Debug("received request")
 
-	msgId, err := s.store.SaveMessage(ctx, dto)
+	msgID, err := s.store.SaveMessage(ctx, dto)
 	if err != nil {
 		return err
 	}
 
-	msg, err := s.store.GetMessage(ctx, msgId)
+	msg, err := s.store.GetMessage(ctx, msgID)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (s *APIServer) handleSaveMessage(w http.ResponseWriter, r *http.Request) er
 		return err
 	}
 
-	if err := s.store.UpdateStatusMessages(ctx, []uint64{msgId}, MessageProcessing); err != nil {
+	if err := s.store.UpdateStatusMessages(ctx, []uint64{msgID}, MessageProcessing); err != nil {
 		return err
 	}
 

@@ -95,7 +95,7 @@ func RunTaskReadProcessingMessages(
 }
 
 func setupMetadataTask(baseCtx context.Context, baseLog *slog.Logger) (ctx context.Context, log *slog.Logger) {
-	tid := genTraceId()
+	tid := genTraceID()
 	ctx = ctxstore.With(baseCtx, TraceIDKey, tid)
 	log = baseLog.With(TraceIDKey.String(), tid)
 	return
