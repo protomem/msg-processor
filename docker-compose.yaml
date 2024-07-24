@@ -26,6 +26,21 @@ services:
     networks:
       - app_tier
 
+  pg_admin:
+    image: dpage/pgadmin4:4.23
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
+      PGADMIN_DEFAULT_PASSWORD: 123456789
+      PGADMIN_LISTEN_PORT: 80
+    ports:
+      - 15432:80
+    volumes:
+      - pg_admin_data:/var/lib/pgadmin
+    depends_on:
+      - pg
+    networks:
+      - app_tier
+
   kafka:
     image: bitnami/kafka:latest
     environment:
@@ -62,6 +77,7 @@ services:
 
 volumes:
   pg_data:
+  pg_admin_data:
   kafka_data:
 
 networks:
