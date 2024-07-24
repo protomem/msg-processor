@@ -62,10 +62,3 @@ DB_DSN="<db_dsn>" make migrations/goto version=<version> # перейти на
 
 DB_DSN="<db_dsn>" make migrations/force version=<version> # применить миграцию версии <version>
 ```
-
-## Endpoints
-
-- `/health` - проверка работоспособности сервиса
-- `/swagger` - документация API
-- `POST /api/msg` - сохранение нового сообщения
-- `GET /api/msg` - статистика по сообщениям
