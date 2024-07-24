@@ -39,6 +39,8 @@ func (s *APIServer) ListenAddr() string {
 }
 
 func (s *APIServer) Run() error {
+	s.setupSwagger()
+
 	h := s.setupRoutes()
 	h = UseMiddleware(h, s.traceId, s.logAccess, s.recovery)
 	s.srv.Handler = h

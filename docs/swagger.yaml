@@ -1,0 +1,84 @@
+definitions:
+  main.Message:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/main.MessageStatus'
+      text:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  main.MessageStatisticsDTO:
+    properties:
+      completed:
+        type: integer
+      processing:
+        type: integer
+    type: object
+  main.MessageStatus:
+    enum:
+    - created
+    - processing
+    - completed
+    type: string
+    x-enum-varnames:
+    - MessageCreated
+    - MessageProcessing
+    - MessageCompleted
+  main.SaveMessageDTO:
+    properties:
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /msg:
+    get:
+      consumes:
+      - application/json
+      description: Message statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MessageStatisticsDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Message statistics
+      tags:
+      - message
+    post:
+      consumes:
+      - application/json
+      description: Save message
+      parameters:
+      - description: Message
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/main.SaveMessageDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.Message'
+        "500":
+          description: Internal Server Error
+          schema:
+            type: object
+      summary: Save message
+      tags:
+      - message
+swagger: "2.0"
