@@ -19,7 +19,7 @@ func NewScheduler() quartz.Scheduler {
 func RunTaskReadProcessingMessages(
 	scheduler quartz.Scheduler, baseLog *slog.Logger,
 	store Storage, queue Queue,
-	runTimeout time.Duration,
+	runInterval time.Duration, runTimeout time.Duration,
 ) error {
 	const taskName = "readProcessingMessages"
 	baseLog = baseLog.With("task", taskName)
@@ -27,6 +27,9 @@ func RunTaskReadProcessingMessages(
 	// TODO: Commit messages after they are processed
 	task := job.NewFunctionJob(func(ctx context.Context) (struct{}, error) {
 		ctx, log := setupMetadataTask(ctx, baseLog)
+
+		ctx, cancel := context.WithTimeout(ctx, runTimeout)
+		defer cancel()
 
 		log.Info("starting")
 		defer log.Info("finished")
@@ -87,7 +90,7 @@ func RunTaskReadProcessingMessages(
 
 	return scheduler.ScheduleJob(
 		quartz.NewJobDetail(task, quartz.NewJobKey(taskName)),
-		quartz.NewSimpleTrigger(runTimeout),
+		quartz.NewSimpleTrigger(runInterval),
 	)
 }
 

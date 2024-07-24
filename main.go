@@ -84,7 +84,7 @@ func main() {
 		if err := RunTaskReadProcessingMessages(
 			scheduler, log,
 			store, queue,
-			env.GetDuration("READ_PROC_MSGS_TIMEOUT", 1*time.Second),
+			env.GetDuration("READ_PROC_MSGS_INTERVAL", 1*time.Second), env.GetDuration("READ_PROC_MSGS_TIMEOUT", 30*time.Second),
 		); err != nil {
 			errs = errors.Join(errs, err)
 		}
