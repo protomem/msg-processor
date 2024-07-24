@@ -27,7 +27,7 @@ services:
       - app_tier
 
   pg_admin:
-    image: dpage/pgadmin4:4.23
+    image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com
       PGADMIN_DEFAULT_PASSWORD: 123456789
