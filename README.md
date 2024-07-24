@@ -1,0 +1,70 @@
+# Msg Processor
+
+## Описание
+
+Сервис для обработки сообщений.
+
+- Сылка на работующий проект:
+- Сылка на Swagger:
+- Строка подключения к базе данных:
+- Адреса кафки:
+- Доступ к админ панели кафки:
+
+## Используемые технологии
+
+- Go 1.22
+- Postgres 14
+- Kafka
+
+## Конфигурация
+
+Основная конфигурация хранится в переменных окружения.
+Флаг (опциональный) `-cfg` указывает путь к конфигурационному файлу(например, `.env`).
+
+### Переменные окружения
+
+- `STORE_DSN` - строка подключения к базе данных
+- `STORE_PING` - флаг проверки подключения к базе данных
+- `QUEUE_ADDRS` - адреса кафки
+- `QUEUE_TOPIC` - топик кафки
+- `LISTEN_ADDR` - адрес для прослушивания сервера
+- `BASE_URL` - адрес для Swagger
+- `READ_PROC_MSGS_INTERVAL` - интервал опроса кафки
+- `READ_PROC_MSGS_TIMEOUT` - время ожидания сообщения от кафки
+
+## Запуск
+
+### Клонирование
+
+```sh
+git clone https://github.com/protomem/msg-processor.git && cd msg-processor
+```
+
+### Docker
+
+```sh
+docker-compose up -d
+# или
+make run-docker
+```
+
+## Мигации
+
+```sh
+DB_DSN="<db_dsn>" make migrations/up # запустить миграции
+
+DB_DSN="<db_dsn>" make migrations/down # откатить миграции
+
+DB_DSN="<db_dsn>" make migrations/new name=<name> # создать новую миграцию
+
+DB_DSN="<db_dsn>" make migrations/goto version=<version> # перейти на версию <version> миграции
+
+DB_DSN="<db_dsn>" make migrations/force version=<version> # применить миграцию версии <version>
+```
+
+## Endpoints
+
+- `/health` - проверка работоспособности сервиса
+- `/swagger` - документация API
+- `POST /api/msg` - сохранение нового сообщения
+- `GET /api/msg` - статистика по сообщениям
