@@ -68,7 +68,18 @@ func (q *KafkaQueue) WriteEvents(ctx context.Context, events ...Event) error {
 }
 
 func (q *KafkaQueue) ReadEvent(ctx context.Context) (Event, error) {
-	panic("not implemented")
+	log := q.log.With(TraceIDKey.String(), ctxstore.MustFrom[string](ctx, TraceIDKey))
+
+	msg, err := q.reader.ReadMessage(ctx)
+	if err != nil {
+		log.Debug("failed to read event", "error", err)
+
+		return Event{}, err
+	}
+
+	log.Debug("read event")
+
+	return eventFromKafkaMsg(msg), nil
 }
 
 func (q *KafkaQueue) Close(_ context.Context) error {
@@ -89,6 +100,14 @@ func kafkaMsgFromEvent(evt Event) kafka.Message {
 	return kafka.Message{
 		Key:   bytes.Clone(evt.Key),
 		Value: bytes.Clone(evt.Value),
+	}
+}
+
+func eventFromKafkaMsg(msg kafka.Message) Event {
+	return Event{
+		Key:    bytes.Clone(msg.Key),
+		Value:  bytes.Clone(msg.Value),
+		Tstamp: msg.Time,
 	}
 }
 
