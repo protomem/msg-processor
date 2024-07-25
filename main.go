@@ -34,6 +34,7 @@ func main() {
 		var opts PgStorageOptions
 		opts.DSN = env.GetString("STORE_DSN", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable")
 		opts.Ping = env.GetBool("STORE_PING", false)
+		opts.Automigrate = env.GetBool("STORE_MIGRATE", false)
 
 		var err error
 		store, err = NewPgStorage(ctx, log, opts)

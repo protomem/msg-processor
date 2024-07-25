@@ -6,8 +6,13 @@ import (
 	"errors"
 	"log/slog"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"github.com/protomem/msg-processor/assets"
 	"github.com/protomem/msg-processor/pkg/ctxstore"
+
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 const _pgDriverName = "pgx"
@@ -15,8 +20,9 @@ const _pgDriverName = "pgx"
 var _ Storage = (*PgStorage)(nil)
 
 type PgStorageOptions struct {
-	DSN  string
-	Ping bool
+	DSN         string
+	Ping        bool
+	Automigrate bool
 }
 
 type PgStorage struct {
@@ -33,6 +39,26 @@ func NewPgStorage(ctx context.Context, log *slog.Logger, opts PgStorageOptions) 
 
 	if opts.Ping {
 		if err := db.PingContext(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	if opts.Automigrate {
+		iofsDriver, err := iofs.New(assets.Assets, "migrations")
+		if err != nil {
+			return nil, err
+		}
+
+		migrator, err := migrate.NewWithSourceInstance("iofs", iofsDriver, opts.DSN)
+		if err != nil {
+			return nil, err
+		}
+
+		err = migrator.Up()
+		switch {
+		case errors.Is(err, migrate.ErrNoChange):
+			break
+		case err != nil:
 			return nil, err
 		}
 	}
