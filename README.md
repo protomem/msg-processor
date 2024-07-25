@@ -45,9 +45,13 @@ git clone https://github.com/protomem/msg-processor.git && cd msg-processor
 
 ```sh
 docker compose up -d
-# или
+```
+или
+```sh
 make run-docker
 ```
+
+- Не забудьте, если вы запускаете приложение не для тестирования, вам нужно указать в `BASE_URL` IP-адрес вашего сервера.
 
 ## Миграции
 
