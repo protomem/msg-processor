@@ -43,11 +43,6 @@ func main() {
 			panic(err)
 		}
 	}
-	defer func() {
-		if err := store.Close(ctx); err != nil {
-			log.Error("failed to close storage", "error", err)
-		}
-	}()
 
 	var queue Queue
 	{
@@ -62,11 +57,6 @@ func main() {
 			panic(err)
 		}
 	}
-	defer func() {
-		if err := queue.Close(ctx); err != nil {
-			log.Error("failed to close queue")
-		}
-	}()
 
 	var srv *APIServer
 	{
@@ -103,12 +93,17 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 
-		err := srv.Shutdown(ctx)
+		var errs error
+		{
+			errs = errors.Join(errs, srv.Shutdown(ctx))
+			errs = errors.Join(errs, store.Close(ctx))
+			errs = errors.Join(errs, queue.Close(ctx))
+		}
 
 		scheduler.Stop()
 		scheduler.Wait(ctx)
 
-		shutdownErrCh <- err
+		shutdownErrCh <- errs
 	}()
 
 	log.Info("starting server", "addr", srv.ListenAddr())
