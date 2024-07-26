@@ -69,7 +69,7 @@ DB_DSN="<db_dsn>" make migrations/force version=<version> # применить �
 
 ## FAQ
 
-### Что если Kakfka не читает сообщения?
+### Что, если Kakfka не читает сообщения?
 
 ```sh
 docker compose down && docker compose up -d
